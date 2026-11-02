@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CANVAiS - Context-Aware Naturally Vibe AI Sketcher</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Top Toolbar -->
+        <header id="header-bar">
+            <div class="brand">
+                <span class="logo-icon">🎨🗺️</span>
+                <h1>CANVAiS</h1>
+                <span class="badge">Vibe AI</span>
+            </div>
+            <div class="session-selector">
+                <label for="session-dropdown">Session:</label>
+                <select id="session-dropdown">
+                    <option value="">Loading sessions...</option>
+                </select>
+                <button id="btn-new-session" class="btn btn-secondary">+ New Map</button>
+            </div>
+            <div class="mode-toggles">
+                <button id="btn-mode-pan" class="btn btn-toggle active" title="Pan / Navigate">🖐️ Pan</button>
+                <button id="btn-mode-draw" class="btn btn-toggle" title="Freehand Gesture Intent">✏️ Gesture</button>
+                <button id="btn-vibe-record" class="btn btn-primary" title="Record Voice Vibe">🎙️ Vibe Record</button>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <div id="workspace">
+            <!-- Left Sidebar: Layers & Schemas -->
+            <aside id="sidebar">
+                <div class="sidebar-header">
+                    <h3>Layers</h3>
+                    <button id="btn-add-layer" class="btn btn-sm btn-outline">+ Layer</button>
+                </div>
+                <div id="layer-list" class="layer-container">
+                    <!-- Layer cards populated dynamically -->
+                </div>
+
+                <div class="sidebar-header mt-4">
+                    <h3>MCP & Plugins</h3>
+                    <button id="btn-mcp-settings" class="btn btn-sm btn-outline">Settings</button>
+                </div>
+                <div id="mcp-status-container" class="plugin-container">
+                    <div class="mcp-card">
+                        <span class="status-dot connected"></span>
+                        <span class="mcp-name">Local Core AI</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center: Interactive Map & Canvas Overlay -->
+            <main id="map-viewport-wrapper">
+                <div id="map"></div>
+                <canvas id="gesture-canvas"></canvas>
+
+                <!-- Vibe Proposal Banner / Preview Overlay -->
+                <div id="proposal-banner" class="proposal-overlay hidden">
+                    <div class="proposal-content">
+                        <h4>✨ AI Vibe Sketch Proposal</h4>
+                        <p id="proposal-summary">Interpreted: 1 perimeter and 2 checkpoints</p>
+                        <div class="proposal-actions">
+                            <button id="btn-accept-proposal" class="btn btn-success">Accept & Plot</button>
+                            <button id="btn-reject-proposal" class="btn btn-danger">Discard</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Audio Vibe Floating Bar -->
+        <div id="vibe-floating-bar" class="vibe-bar hidden">
+            <span class="recording-indicator">🔴 Recording Vibe... Speak your intent while drawing</span>
+            <input type="text" id="vibe-text-input" placeholder="Or type your vibe intent description..." />
+            <button id="btn-submit-vibe" class="btn btn-primary">Synthesize</button>
+            <button id="btn-cancel-vibe" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/map-renderer.js"></script>
+    <script src="js/gesture-recorder.js"></script>
+    <script src="js/vibe-audio.js"></script>
+    <script src="js/proposal-reviewer.js"></script>
+    <script src="js/schema-manager.js"></script>
+    <script src="js/mcp-settings.js"></script>
+</body>
+</html>

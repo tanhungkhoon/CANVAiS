@@ -1,0 +1,198 @@
+openapi: 3.0.3
+info:
+  title: CANVAiS Vibe & Multimodal Intent Fusion API
+  version: 1.0.0
+  description: API for processing speech/text vibe, freehand visual gestures, generating spatial proposals, and committing AI-synthesized entities.
+servers:
+  - url: /api/v1
+paths:
+  /vibe/propose:
+    post:
+      summary: Submit vibe text and gesture strokes to generate a spatial sketching proposal
+      operationId: proposeVibeIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VibeIntentProposeRequest'
+      responses:
+        '200':
+          description: Synthesized spatial proposal ready for user review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VibeIntentProposalResponse'
+        '400':
+          description: Invalid coordinates or ambiguous intent
+
+  /vibe/transcribe:
+    post:
+      summary: Upload audio stream to transcribe naturally spoken vibe
+      operationId: transcribeAudioVibe
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: Audio recording in WAV or WebM format
+      responses:
+        '200':
+          description: Transcribed speech
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcript:
+                    type: string
+                    example: "Draw a circular safety perimeter around the lake with two access gates"
+                  confidence:
+                    type: number
+                    example: 0.94
+
+  /vibe/proposals/{proposalId}/accept:
+    post:
+      summary: Accept and commit proposed entities into the designated layer
+      operationId: acceptProposal
+      parameters:
+        - name: proposalId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Optional modifications to candidate entities prior to commit
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptProposalRequest'
+      responses:
+        '200':
+          description: Entities successfully committed to the layer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  committedCount:
+                    type: integer
+                  entityIds:
+                    type: array
+                    items:
+                      type: string
+                      format: uuid
+
+components:
+  schemas:
+    VibeIntentProposeRequest:
+      type: object
+      required:
+        - sessionId
+        - targetLayerId
+        - textVibe
+        - gestureStrokes
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        targetLayerId:
+          type: string
+          format: uuid
+        textVibe:
+          type: string
+          example: "Plot a search corridor along this ridgeline with three rally points"
+        gestureStrokes:
+          type: array
+          description: Ordered coordinate sequence of freehand drawing points
+          items:
+            $ref: '#/components/schemas/GesturePoint'
+        viewportBounds:
+          $ref: '#/components/schemas/BoundingBox'
+
+    GesturePoint:
+      type: object
+      required:
+        - lat
+        - lng
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+        timestampMs:
+          type: integer
+
+    BoundingBox:
+      type: object
+      required:
+        - north
+        - south
+        - east
+        - west
+      properties:
+        north:
+          type: number
+        south:
+          type: number
+        east:
+          type: number
+        west:
+          type: number
+
+    VibeIntentProposalResponse:
+      type: object
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        targetLayerId:
+          type: string
+          format: uuid
+        interpretedSummary:
+          type: string
+          example: "Generated 1 search path along the ridge and 3 rally point markers based on gesture bounds"
+        proposedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProposedEntity'
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED, REJECTED]
+
+    ProposedEntity:
+      type: object
+      properties:
+        tempId:
+          type: string
+        name:
+          type: string
+        entityType:
+          type: string
+        geometry:
+          type: object
+        style:
+          type: object
+        semanticAttributes:
+          type: object
+        confidence:
+          type: number
+
+    AcceptProposalRequest:
+      type: object
+      properties:
+        selectedTempIds:
+          type: array
+          items:
+            type: string
+        entityOverrides:
+          type: array
+          items:
+            type: object

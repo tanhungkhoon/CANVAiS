@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: CANVAiS MCP & AI Skill Plugins API
+  version: 1.0.0
+  description: Management and discovery API for Model Context Protocol (MCP) servers and AI skill plugins.
+servers:
+  - url: /api/v1
+paths:
+  /integrations/mcp:
+    get:
+      summary: List all configured MCP servers and status
+      operationId: listMcpServers
+      responses:
+        '200':
+          description: List of MCP server configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/McpServerStatusResponse'
+    post:
+      summary: Register a new MCP server connection
+      operationId: registerMcpServer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterMcpServerRequest'
+      responses:
+        '201':
+          description: Server registered and connection verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/McpServerStatusResponse'
+        '400':
+          description: Connection failed or invalid configuration
+
+  /integrations/mcp/{serverId}/discover:
+    post:
+      summary: Trigger tool and schema discovery on an active MCP server
+      operationId: discoverMcpCapabilities
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Discovered tools and layer schemas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/McpDiscoveryResponse'
+
+  /integrations/schemas:
+    get:
+      summary: List available semantic schemas for custom layers
+      operationId: listSemanticSchemas
+      responses:
+        '200':
+          description: Available schemas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SemanticSchemaResponse'
+    post:
+      summary: Define a new custom semantic schema
+      operationId: createSemanticSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSemanticSchemaRequest'
+      responses:
+        '201':
+          description: Schema registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticSchemaResponse'
+
+components:
+  schemas:
+    RegisterMcpServerRequest:
+      type: object
+      required:
+        - name
+        - transportType
+        - endpointUri
+      properties:
+        name:
+          type: string
+          example: "Disaster Response MCP"
+        transportType:
+          type: string
+          enum: [SSE, STDIO]
+        endpointUri:
+          type: string
+          example: "http://localhost:8081/mcp/sse"
+
+    McpServerStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        transportType:
+          type: string
+        endpointUri:
+          type: string
+        status:
+          type: string
+          enum: [CONNECTED, CONNECTING, DISCONNECTED, ERROR]
+        discoveredTools:
+          type: array
+          items:
+            type: string
+
+    McpDiscoveryResponse:
+      type: object
+      properties:
+        serverId:
+          type: string
+        tools:
+          type: array
+          items:
+            type: string
+        schemas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SemanticSchemaResponse'
+
+    SemanticSchemaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        domainCategory:
+          type: string
+        version:
+          type: string
+        entityTypes:
+          type: array
+          items:
+            type: object
+
+    CreateSemanticSchemaRequest:
+      type: object
+      required:
+        - name
+        - domainCategory
+        - entityTypes
+      properties:
+        name:
+          type: string
+          example: "UrbanZoningSchema"
+        domainCategory:
+          type: string
+          example: "UrbanPlanning"
+        version:
+          type: string
+          default: "1.0.0"
+        entityTypes:
+          type: array
+          items:
+            type: object

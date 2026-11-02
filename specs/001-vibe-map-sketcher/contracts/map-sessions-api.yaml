@@ -1,0 +1,292 @@
+openapi: 3.0.3
+info:
+  title: CANVAiS Map Sessions & Layers API
+  version: 1.0.0
+  description: Core REST API for managing map sessions, layers, and plotted graphical entities.
+servers:
+  - url: /api/v1
+paths:
+  /sessions:
+    post:
+      summary: Create a new map session
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapSessionResponse'
+    get:
+      summary: List all map sessions
+      operationId: listSessions
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MapSessionResponse'
+
+  /sessions/{sessionId}:
+    get:
+      summary: Get session details by ID
+      operationId: getSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed session data with layers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapSessionDetailResponse'
+        '404':
+          description: Session not found
+
+  /sessions/{sessionId}/layers:
+    post:
+      summary: Add a layer to a session
+      operationId: createLayer
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLayerRequest'
+      responses:
+        '201':
+          description: Layer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapLayerResponse'
+
+  /layers/{layerId}/entities:
+    get:
+      summary: Get all graphical entities in a layer
+      operationId: getLayerEntities
+      parameters:
+        - name: layerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: GeoJSON FeatureCollection of entities in the layer
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonFeatureCollection'
+    post:
+      summary: Plot a new graphical entity onto a layer
+      operationId: createEntity
+      parameters:
+        - name: layerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntityRequest'
+      responses:
+        '201':
+          description: Entity plotted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphicalEntityResponse'
+
+components:
+  schemas:
+    CreateSessionRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          example: "Alpine Region Search & Rescue Plan"
+        description:
+          type: string
+          example: "Coordinating perimeter defense and medical triage zones"
+        centerLat:
+          type: number
+          default: 46.8182
+        centerLng:
+          type: number
+          default: 8.2275
+        zoomLevel:
+          type: integer
+          default: 12
+
+    MapSessionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        centerLat:
+          type: number
+        centerLng:
+          type: number
+        zoomLevel:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MapSessionDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/MapSessionResponse'
+        - type: object
+          properties:
+            layers:
+              type: array
+              items:
+                $ref: '#/components/schemas/MapLayerResponse'
+
+    CreateLayerRequest:
+      type: object
+      required:
+        - name
+        - layerType
+      properties:
+        name:
+          type: string
+          example: "Tactical Perimeters"
+        orderIndex:
+          type: integer
+          default: 0
+        layerType:
+          type: string
+          enum: [STANDARD, CUSTOM_SEMANTIC, MCP_MANAGED]
+        schemaId:
+          type: string
+          format: uuid
+
+    MapLayerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        orderIndex:
+          type: integer
+        visible:
+          type: boolean
+        opacity:
+          type: number
+        layerType:
+          type: string
+        schemaId:
+          type: string
+          format: uuid
+
+    CreateEntityRequest:
+      type: object
+      required:
+        - entityType
+        - geometry
+      properties:
+        name:
+          type: string
+        entityType:
+          type: string
+          example: "ObservationPoint"
+        geometry:
+          type: object
+          description: Standard GeoJSON geometry object (Point, Polygon, LineString)
+        style:
+          $ref: '#/components/schemas/EntityStyle'
+        semanticAttributes:
+          type: object
+          additionalProperties: true
+
+    EntityStyle:
+      type: object
+      properties:
+        strokeColor:
+          type: string
+          example: "#2A9D8F"
+        fillColor:
+          type: string
+          example: "#2A9D8F33"
+        strokeWidth:
+          type: number
+          default: 2.0
+        icon:
+          type: string
+          example: "camp"
+
+    GraphicalEntityResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        layerId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        entityType:
+          type: string
+        geometry:
+          type: object
+        style:
+          $ref: '#/components/schemas/EntityStyle'
+        semanticAttributes:
+          type: object
+        provenance:
+          type: string
+
+    GeoJsonFeatureCollection:
+      type: object
+      properties:
+        type:
+          type: string
+          example: FeatureCollection
+        features:
+          type: array
+          items:
+            type: object
