@@ -6,5 +6,6 @@ package com.canvais.domain.model;
 public enum LayerType {
     STANDARD,
     CUSTOM_SEMANTIC,
-    MCP_MANAGED
+    MCP_MANAGED,
+    OVERLAY
 }

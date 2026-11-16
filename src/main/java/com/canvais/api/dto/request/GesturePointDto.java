@@ -12,6 +12,10 @@ public class GesturePointDto {
     public GesturePointDto() {
     }
 
+    public GesturePointDto(double lat, double lng) {
+        this(lat, lng, null);
+    }
+
     public GesturePointDto(double lat, double lng, Long timestampMs) {
         this.lat = lat;
         this.lng = lng;

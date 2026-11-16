@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: canvais
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: gemma4:e4b
   datasource:
     url: jdbc:h2:mem:canvaisdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -40,3 +46,9 @@ canvais:
     confidence-threshold: 0.70
   mcp:
     request-timeout-seconds: 15
+  chat:
+    default-model: llama3.2
+    request-timeout-seconds: 30
+    overlay-layer-name: "Chat Sketch Overlay"
+    overlay-layer-order: 100
+    fallback-enabled: true

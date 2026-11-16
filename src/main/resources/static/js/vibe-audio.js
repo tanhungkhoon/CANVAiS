@@ -24,6 +24,17 @@ const VibeAudioClient = {
         btnSubmit.addEventListener('click', () => {
             this.submitIntent();
         });
+
+        const btnVibeToChat = document.getElementById('btn-vibe-to-chat');
+        if (btnVibeToChat) {
+            btnVibeToChat.addEventListener('click', () => {
+                this.stopVoiceCapture();
+                this.toggleVibeBar(false);
+                if (typeof ChatPanelClient !== 'undefined') {
+                    ChatPanelClient.forwardActiveVibe();
+                }
+            });
+        }
     },
 
     toggleVibeBar(show) {

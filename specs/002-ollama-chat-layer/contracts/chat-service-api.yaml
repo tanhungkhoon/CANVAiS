@@ -1,0 +1,439 @@
+openapi: 3.0.3
+info:
+  title: CANVAiS Local AI Chat & Layer Sketching API
+  description: >
+    RESTful interface for conversational map sketching using Spring AI and a local Ollama LLM,
+    supporting drawing of graphical objects into a dedicated overlay layer above the base map layer,
+    and ingesting existing vibe records.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local CANVAiS instance
+
+tags:
+  - name: Chat Sketching
+    description: Conversational layer sketching and local model interactions
+
+paths:
+  /chat/health:
+    get:
+      tags:
+        - Chat Sketching
+      summary: Check local Ollama AI model connectivity and status
+      operationId: getChatAiHealth
+      responses:
+        '200':
+          description: AI provider status returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiHealthResponse'
+
+  /chat/sessions:
+    post:
+      tags:
+        - Chat Sketching
+      summary: Initialize or retrieve a chat session for a map session
+      operationId: createChatSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatSessionRequest'
+      responses:
+        '200':
+          description: Chat session initialized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponse'
+        '404':
+          description: MapSession not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/sessions/{chatSessionId}:
+    get:
+      tags:
+        - Chat Sketching
+      summary: Retrieve chat session details and message history
+      operationId: getChatSession
+      parameters:
+        - name: chatSessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Chat session and message history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionDetailResponse'
+        '404':
+          description: Chat session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/sessions/{chatSessionId}/messages:
+    post:
+      tags:
+        - Chat Sketching
+      summary: Send a conversational prompt to the local AI to sketch or refine objects
+      operationId: sendChatMessage
+      parameters:
+        - name: chatSessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendChatMessageRequest'
+      responses:
+        '200':
+          description: AI response with generated/modified entities on overlay layer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageTurnResponse'
+        '400':
+          description: Invalid request or unparseable spatial intent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Chat session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/sessions/{chatSessionId}/vibe:
+    post:
+      tags:
+        - Chat Sketching
+      summary: Ingest an existing vibe record into the chat stream to trigger layer sketching
+      operationId: ingestVibeRecordToChat
+      parameters:
+        - name: chatSessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestVibeToChatRequest'
+      responses:
+        '200':
+          description: Vibe record ingested and processed into chat sketch turn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageTurnResponse'
+
+  /chat/sessions/{chatSessionId}/layer:
+    delete:
+      tags:
+        - Chat Sketching
+      summary: Clear all sketched objects from the chat overlay layer
+      operationId: clearChatOverlayLayer
+      parameters:
+        - name: chatSessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Overlay layer cleared successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClearLayerResponse'
+
+components:
+  schemas:
+    AiHealthResponse:
+      type: object
+      required:
+        - status
+        - activeModel
+        - endpoint
+      properties:
+        status:
+          type: string
+          enum: [AVAILABLE, BUSY, DEGRADED, UNAVAILABLE]
+        activeModel:
+          type: string
+          example: llama3.2
+        endpoint:
+          type: string
+          example: http://localhost:11434
+        latencyMs:
+          type: integer
+          example: 45
+        message:
+          type: string
+          example: Local Ollama service is connected and ready.
+
+    CreateChatSessionRequest:
+      type: object
+      required:
+        - mapSessionId
+      properties:
+        mapSessionId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Operational Zone Sketching
+
+    ChatSessionResponse:
+      type: object
+      required:
+        - id
+        - mapSessionId
+        - targetLayerId
+        - title
+        - activeModel
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        mapSessionId:
+          type: string
+          format: uuid
+        targetLayerId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        activeModel:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatSessionDetailResponse:
+      type: object
+      required:
+        - session
+        - messages
+      properties:
+        session:
+          $ref: '#/components/schemas/ChatSessionResponse'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessageDto'
+
+    SendChatMessageRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Draw a rectangular observation perimeter around the central station.
+        vibeRecordId:
+          type: string
+          format: uuid
+        viewportBounds:
+          $ref: '#/components/schemas/BoundingBox'
+        centerCoordinates:
+          $ref: '#/components/schemas/CoordinatePoint'
+
+    IngestVibeToChatRequest:
+      type: object
+      required:
+        - vibeTranscript
+      properties:
+        vibeRecordId:
+          type: string
+          format: uuid
+        vibeTranscript:
+          type: string
+          example: Sketch an evacuation corridor from north gate to highway 12
+        gesturePoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoordinatePoint'
+        viewportBounds:
+          $ref: '#/components/schemas/BoundingBox'
+
+    ChatMessageDto:
+      type: object
+      required:
+        - id
+        - role
+        - content
+        - actionType
+        - timestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [USER, ASSISTANT, SYSTEM]
+        content:
+          type: string
+        vibeRecordId:
+          type: string
+          format: uuid
+        actionType:
+          type: string
+          enum: [CREATE, UPDATE, DELETE, QUERY, NONE]
+        timestamp:
+          type: string
+          format: date-time
+
+    ChatMessageTurnResponse:
+      type: object
+      required:
+        - userMessage
+        - assistantMessage
+        - actionType
+        - affectedEntities
+      properties:
+        userMessage:
+          $ref: '#/components/schemas/ChatMessageDto'
+        assistantMessage:
+          $ref: '#/components/schemas/ChatMessageDto'
+        actionType:
+          type: string
+          enum: [CREATE, UPDATE, DELETE, QUERY, NONE]
+        targetLayerId:
+          type: string
+          format: uuid
+        affectedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphicalEntityDto'
+
+    GraphicalEntityDto:
+      type: object
+      required:
+        - id
+        - layerId
+        - name
+        - entityType
+        - geometry
+      properties:
+        id:
+          type: string
+          format: uuid
+        layerId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        entityType:
+          type: string
+        geometry:
+          type: object
+          description: GeoJSON Geometry (Point, LineString, Polygon)
+        style:
+          $ref: '#/components/schemas/EntityStyleDto'
+        semanticAttributes:
+          type: object
+          additionalProperties: true
+        confidence:
+          type: number
+
+    EntityStyleDto:
+      type: object
+      properties:
+        strokeColor:
+          type: string
+          example: "#E76F51"
+        fillColor:
+          type: string
+          example: "#E76F5133"
+        strokeWidth:
+          type: number
+          example: 2.5
+        dashArray:
+          type: string
+        icon:
+          type: string
+
+    CoordinatePoint:
+      type: object
+      required:
+        - lat
+        - lng
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+
+    BoundingBox:
+      type: object
+      required:
+        - north
+        - south
+        - east
+        - west
+      properties:
+        north:
+          type: number
+        south:
+          type: number
+        east:
+          type: number
+        west:
+          type: number
+
+    ClearLayerResponse:
+      type: object
+      required:
+        - layerId
+        - clearedEntitiesCount
+      properties:
+        layerId:
+          type: string
+          format: uuid
+        clearedEntitiesCount:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string

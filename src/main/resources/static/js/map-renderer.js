@@ -116,6 +116,11 @@ const CanvaisApp = {
 
         // Render layers in sidebar
         this.renderLayers(sessionDetail.layers || []);
+
+        // Sync Chat Session
+        if (typeof ChatPanelClient !== 'undefined') {
+            ChatPanelClient.ensureSession(sessionId);
+        }
     },
 
     renderLayers(layers) {

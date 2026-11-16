@@ -28,6 +28,7 @@
                 <button id="btn-mode-pan" class="btn btn-toggle active" title="Pan / Navigate">🖐️ Pan</button>
                 <button id="btn-mode-draw" class="btn btn-toggle" title="Freehand Gesture Intent">✏️ Gesture</button>
                 <button id="btn-vibe-record" class="btn btn-primary" title="Record Voice Vibe">🎙️ Vibe Record</button>
+                <button id="btn-toggle-chat" class="btn btn-secondary" title="Open Local AI Chat Sketcher">💬 Chat AI</button>
             </div>
         </header>
 
@@ -72,6 +73,37 @@
                     </div>
                 </div>
             </main>
+
+            <!-- Right Sidebar: Local AI Chat Sketching Panel -->
+            <aside id="chat-panel" class="chat-drawer">
+                <div class="chat-header">
+                    <div class="chat-title-group">
+                        <span class="chat-icon">🤖</span>
+                        <h3>AI Chat Sketcher</h3>
+                        <span id="chat-model-badge" class="badge">Ollama (llama3.2)</span>
+                        <span id="ai-health-status" class="status-dot connected" title="Checking status..."></span>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button id="btn-clear-chat-layer" class="btn btn-sm btn-outline-danger" title="Clear Overlay Drawings">Clear Layer</button>
+                        <button id="btn-close-chat" class="btn btn-sm btn-icon" title="Close Panel">✕</button>
+                    </div>
+                </div>
+                <div id="chat-messages" class="chat-history">
+                    <div class="chat-bubble system">
+                        <p>👋 Welcome to CANVAiS Chat. Describe geographical objects to draw onto the dedicated overlay layer, or speak intent via the Vibe recorder.</p>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="chat-toolbar">
+                        <button id="btn-chat-vibe-forward" class="btn btn-xs btn-outline" title="Forward last vibe recording to chat">🎙️ Send Vibe</button>
+                        <span id="chat-overlay-status" class="chat-layer-indicator">Overlay: Active</span>
+                    </div>
+                    <form id="chat-form" class="chat-form">
+                        <textarea id="chat-prompt-input" rows="2" placeholder="e.g. Draw a perimeter around the park..."></textarea>
+                        <button type="submit" id="btn-send-chat" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </aside>
         </div>
 
         <!-- Audio Vibe Floating Bar -->
@@ -79,6 +111,7 @@
             <span class="recording-indicator">🔴 Recording Vibe... Speak your intent while drawing</span>
             <input type="text" id="vibe-text-input" placeholder="Or type your vibe intent description..." />
             <button id="btn-submit-vibe" class="btn btn-primary">Synthesize</button>
+            <button id="btn-vibe-to-chat" class="btn btn-secondary">Send to Chat</button>
             <button id="btn-cancel-vibe" class="btn btn-secondary">Cancel</button>
         </div>
     </div>
@@ -91,5 +124,6 @@
     <script src="js/proposal-reviewer.js"></script>
     <script src="js/schema-manager.js"></script>
     <script src="js/mcp-settings.js"></script>
+    <script src="js/chat-panel.js"></script>
 </body>
 </html>

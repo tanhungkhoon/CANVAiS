@@ -19,6 +19,11 @@ import com.canvais.api.dto.response.ProposedEntityDto
 import com.canvais.api.dto.response.SemanticSchemaResponse
 import com.canvais.api.dto.response.VibeIntentProposalResponse
 import com.canvais.domain.model.AttributeDefinition
+import com.canvais.domain.model.ChatActionType
+import com.canvais.domain.model.ChatEntityAction
+import com.canvais.domain.model.ChatMessage
+import com.canvais.domain.model.ChatRole
+import com.canvais.domain.model.ChatSession
 import com.canvais.domain.model.ConnectionStatus
 import com.canvais.domain.model.DataType
 import com.canvais.domain.model.EntityStyle
@@ -183,5 +188,143 @@ class DomainModelCoverageSpec extends SpecificationBase {
         new McpServerStatusResponse().getDiscoveredTools().isEmpty()
         new SemanticSchemaResponse().getEntityTypes().isEmpty()
         new VibeIntentProposalResponse().getProposedEntities().isEmpty()
+    }
+
+    def "verify Chat domain models and lifecycle hooks"() {
+        when: "creating chat entities"
+        def sessionId = UUID.randomUUID()
+        def mapSessionId = UUID.randomUUID()
+        def layerId = UUID.randomUUID()
+        def chatSession = new ChatSession(sessionId, mapSessionId, layerId, "Tactical Chat", "llama3.2")
+        chatSession.onCreate()
+        chatSession.onUpdate()
+        chatSession.setTitle("Updated Title")
+        chatSession.setActiveModel("mistral")
+        chatSession.setMapSessionId(mapSessionId)
+        chatSession.setTargetLayerId(layerId)
+        chatSession.setId(sessionId)
+
+        def messageId = UUID.randomUUID()
+        def vibeId = UUID.randomUUID()
+        def chatMessage = new ChatMessage(messageId, sessionId, com.canvais.domain.model.ChatRole.USER, "Draw area", vibeId, com.canvais.domain.model.ChatActionType.CREATE, "meta")
+        chatMessage.onCreate()
+        chatMessage.setContent("New Content")
+        chatMessage.setRole(com.canvais.domain.model.ChatRole.ASSISTANT)
+        chatMessage.setActionType(com.canvais.domain.model.ChatActionType.NONE)
+        chatMessage.setVibeRecordId(vibeId)
+        chatMessage.setMetadata("updated-meta")
+        chatMessage.setChatSessionId(sessionId)
+        chatMessage.setId(messageId)
+
+        def entityId = UUID.randomUUID()
+        def action = new com.canvais.domain.model.ChatEntityAction(UUID.randomUUID(), messageId, entityId, com.canvais.domain.model.ChatActionType.UPDATE, "{}")
+        action.onCreate()
+        action.setMessageId(messageId)
+        action.setEntityId(entityId)
+        action.setActionType(com.canvais.domain.model.ChatActionType.CREATE)
+        action.setPreviousStateJson("{\"prev\": true}")
+
+        then: "fields are verified"
+        chatSession.getId() == sessionId
+        chatSession.getTitle() == "Updated Title"
+        chatSession.getActiveModel() == "mistral"
+        chatSession.getMapSessionId() == mapSessionId
+        chatSession.getTargetLayerId() == layerId
+        chatSession.getCreatedAt() != null
+        chatSession.getUpdatedAt() != null
+
+        chatMessage.getId() == messageId
+        chatMessage.getContent() == "New Content"
+        chatMessage.getRole() == com.canvais.domain.model.ChatRole.ASSISTANT
+        chatMessage.getActionType() == com.canvais.domain.model.ChatActionType.NONE
+        chatMessage.getVibeRecordId() == vibeId
+        chatMessage.getMetadata() == "updated-meta"
+        chatMessage.getTimestamp() != null
+
+        action.getMessageId() == messageId
+        action.getEntityId() == entityId
+        action.getActionType() == com.canvais.domain.model.ChatActionType.CREATE
+        action.getPreviousStateJson().contains("prev")
+        action.getExecutedAt() != null
+
+        com.canvais.domain.model.ChatRole.values().length == 3
+        com.canvais.domain.model.ChatActionType.values().length == 5
+        com.canvais.domain.model.AiServiceStatus.values().length == 4
+        com.canvais.domain.model.LayerType.OVERLAY != null
+    }
+
+    def "verify Chat DTOs and results"() {
+        when: "populating chat DTOs"
+        def req1 = new com.canvais.api.dto.request.CreateChatSessionRequest(UUID.randomUUID(), "Title")
+        req1.setMapSessionId(req1.getMapSessionId())
+        req1.setTitle("New Title")
+
+        def req2 = new com.canvais.api.dto.request.SendChatMessageRequest("Hello", UUID.randomUUID(), null, null)
+        req2.setMessage("Updated Msg")
+        req2.setVibeRecordId(null)
+        req2.setViewportBounds(null)
+        req2.setCenterCoordinates(null)
+
+        def req3 = new com.canvais.api.dto.request.IngestVibeToChatRequest(UUID.randomUUID(), "transcript", [], null)
+        req3.setVibeRecordId(null)
+        req3.setVibeTranscript("updated transcript")
+        req3.setGesturePoints([])
+        req3.setViewportBounds(null)
+
+        def health = new com.canvais.api.dto.response.AiHealthResponse(com.canvais.domain.model.AiServiceStatus.AVAILABLE, "llama3.2", "http://localhost", 20L, "OK")
+        health.setStatus(com.canvais.domain.model.AiServiceStatus.BUSY)
+        health.setActiveModel("mistral")
+        health.setEndpoint("http://remote")
+        health.setLatencyMs(40L)
+        health.setMessage("Busy")
+
+        def msgDto = new com.canvais.api.dto.response.ChatMessageDto(UUID.randomUUID(), com.canvais.domain.model.ChatRole.USER, "Text", null, com.canvais.domain.model.ChatActionType.NONE, Instant.now())
+        msgDto.setId(msgDto.getId())
+        msgDto.setRole(com.canvais.domain.model.ChatRole.SYSTEM)
+        msgDto.setContent("System Msg")
+        msgDto.setVibeRecordId(null)
+        msgDto.setActionType(com.canvais.domain.model.ChatActionType.QUERY)
+        msgDto.setTimestamp(Instant.now())
+
+        def sessionResp = new com.canvais.api.dto.response.ChatSessionResponse(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "Title", "llama3.2", Instant.now())
+        sessionResp.setId(sessionResp.getId())
+        sessionResp.setMapSessionId(sessionResp.getMapSessionId())
+        sessionResp.setTargetLayerId(sessionResp.getTargetLayerId())
+        sessionResp.setTitle("Resp Title")
+        sessionResp.setActiveModel("llama3.2")
+        sessionResp.setCreatedAt(Instant.now())
+
+        def detailResp = new com.canvais.api.dto.response.ChatSessionDetailResponse(sessionResp, [msgDto])
+        detailResp.setSession(sessionResp)
+        detailResp.setMessages([msgDto])
+
+        def turnResp = new com.canvais.api.dto.response.ChatMessageTurnResponse(msgDto, msgDto, com.canvais.domain.model.ChatActionType.CREATE, UUID.randomUUID(), [])
+        turnResp.setUserMessage(msgDto)
+        turnResp.setAssistantMessage(msgDto)
+        turnResp.setActionType(com.canvais.domain.model.ChatActionType.UPDATE)
+        turnResp.setTargetLayerId(sessionResp.getTargetLayerId())
+        turnResp.setAffectedEntities([])
+
+        def clearResp = new com.canvais.api.dto.response.ClearLayerResponse(UUID.randomUUID(), 5)
+        clearResp.setLayerId(clearResp.getLayerId())
+        clearResp.setClearedEntitiesCount(10)
+
+        def spatialResult = new com.canvais.infrastructure.ai.AiSpatialResult("Done", com.canvais.domain.model.ChatActionType.CREATE, null, [])
+        spatialResult.setAssistantMessage("Updated Done")
+        spatialResult.setActionType(com.canvais.domain.model.ChatActionType.QUERY)
+        spatialResult.setTargetEntityId(UUID.randomUUID())
+        spatialResult.setEntities([])
+
+        then: "all properties match"
+        req1.getTitle() == "New Title"
+        req2.getMessage() == "Updated Msg"
+        req3.getVibeTranscript() == "updated transcript"
+        health.getStatus() == com.canvais.domain.model.AiServiceStatus.BUSY
+        msgDto.getContent() == "System Msg"
+        sessionResp.getTitle() == "Resp Title"
+        detailResp.getMessages().size() == 1
+        turnResp.getActionType() == com.canvais.domain.model.ChatActionType.UPDATE
+        clearResp.getClearedEntitiesCount() == 10
+        spatialResult.getAssistantMessage() == "Updated Done"
     }
 }
