@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "1604573e-e1b1-4f5a-950e-36cdd0145ea8",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\candidate.json",
+  "output": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\canvais-system.html",
+  "specification": {
+    "sha256": "c63a9c39282b965ecffd3461e327f43d62126615ba0638e20a28eb1eafb0dec7",
+    "bytes": 10414
+  },
+  "artifact": {
+    "sha256": "fe89f1b7cff1a9247873444256d7afe666ef20140f218c325af04519b46ce081",
+    "bytes": 864019
+  }
+}

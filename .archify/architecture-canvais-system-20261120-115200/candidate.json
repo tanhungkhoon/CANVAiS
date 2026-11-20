@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "CANVAiS System Architecture",
+    "output": ".archify/architecture-canvais-system-20261120-115200/canvais-system.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/tanhungkhoon/CANVAiS.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "38fa509d9513fa193c2adb3c8d1260ea132f5969"
+    }
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "User / Operator",
+      "sublabel": "Voice & Touch Client",
+      "pos": [40, 240],
+      "size": [130, 64]
+    },
+    {
+      "id": "web_client",
+      "type": "frontend",
+      "label": "CANVAiS Web Client",
+      "sublabel": "Leaflet & Canvas SPA",
+      "tag": "SPA Frontend",
+      "pos": [270, 240],
+      "size": [150, 64],
+      "sources": [
+        {
+          "path": "src/main/resources/static/index.html",
+          "line": 1,
+          "end_line": 40,
+          "label": "Main UI & Toolbar"
+        },
+        {
+          "path": "src/main/resources/static/js/map-renderer.js",
+          "line": 1,
+          "end_line": 35,
+          "label": "Leaflet Map & Layers"
+        }
+      ]
+    },
+    {
+      "id": "api_controllers",
+      "type": "backend",
+      "label": "REST API Controllers",
+      "sublabel": "Spring Boot REST APIs",
+      "tag": "Spring MVC :8080",
+      "pos": [520, 230],
+      "size": [160, 84],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/api/controller/VibeIntentController.java",
+          "line": 30,
+          "end_line": 55,
+          "label": "Multimodal Vibe Endpoints"
+        },
+        {
+          "path": "src/main/java/com/canvais/api/controller/ChatController.java",
+          "line": 30,
+          "end_line": 55,
+          "label": "Chat Sketch Endpoints"
+        }
+      ]
+    },
+    {
+      "id": "vibe_service",
+      "type": "backend",
+      "label": "Vibe Fusion Service",
+      "sublabel": "Multimodal Synthesis",
+      "tag": "VibeIntentFusionService",
+      "pos": [780, 80],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/service/VibeIntentFusionService.java",
+          "line": 25,
+          "end_line": 65,
+          "label": "Proposal Orchestrator"
+        }
+      ]
+    },
+    {
+      "id": "chat_service",
+      "type": "backend",
+      "label": "Chat Sketch Service",
+      "sublabel": "Conversational LLM",
+      "tag": "ChatService",
+      "pos": [780, 240],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/service/ChatService.java",
+          "line": 55,
+          "end_line": 95,
+          "label": "Chat Orchestrator"
+        }
+      ]
+    },
+    {
+      "id": "layer_service",
+      "type": "backend",
+      "label": "Layer & Entity Service",
+      "sublabel": "Entities & Map Layers",
+      "tag": "GraphicalEntityService",
+      "pos": [780, 380],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/service/GraphicalEntityService.java",
+          "line": 30,
+          "end_line": 65,
+          "label": "Entity Management"
+        },
+        {
+          "path": "src/main/java/com/canvais/service/MapSessionService.java",
+          "line": 20,
+          "end_line": 50,
+          "label": "Session Management"
+        }
+      ]
+    },
+    {
+      "id": "h2_db",
+      "type": "database",
+      "label": "H2 Database / JPA",
+      "sublabel": "Embedded In-Memory DB",
+      "tag": "In-Memory JDBC",
+      "pos": [780, 500],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "src/main/resources/application.yml",
+          "line": 13,
+          "end_line": 22,
+          "label": "H2 Datasource Config"
+        }
+      ]
+    },
+    {
+      "id": "mcp_service",
+      "type": "backend",
+      "label": "MCP Integration Service",
+      "sublabel": "Tool Discovery & Exec",
+      "tag": "McpIntegrationService",
+      "pos": [780, 620],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/service/McpIntegrationService.java",
+          "line": 20,
+          "end_line": 55,
+          "label": "MCP Tool Dispatcher"
+        }
+      ]
+    },
+    {
+      "id": "transcription_spatial",
+      "type": "backend",
+      "label": "Spatial & Audio Engine",
+      "sublabel": "Audio & Spatial Engine",
+      "tag": "Heuristic Fusion",
+      "pos": [1050, 80],
+      "size": [180, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/infrastructure/ai/SpatialReasoningAdapter.java",
+          "line": 20,
+          "end_line": 60,
+          "label": "Spatial Synthesizer"
+        },
+        {
+          "path": "src/main/java/com/canvais/infrastructure/ai/SpeechTranscriptionAdapter.java",
+          "line": 10,
+          "end_line": 30,
+          "label": "Audio Transcriber"
+        }
+      ]
+    },
+    {
+      "id": "ollama_adapter",
+      "type": "backend",
+      "label": "Ollama Model Adapter",
+      "sublabel": "Spring AI ChatModel",
+      "tag": "AiModelClientAdapter",
+      "pos": [1050, 240],
+      "size": [180, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/infrastructure/ai/OllamaChatModelAdapter.java",
+          "line": 40,
+          "end_line": 70,
+          "label": "Spring AI Ollama Client"
+        }
+      ]
+    },
+    {
+      "id": "jts_engine",
+      "type": "backend",
+      "label": "JTS Topology Engine",
+      "sublabel": "JTS Topology & GeoJSON",
+      "tag": "SRID 4326 (WGS84)",
+      "pos": [1050, 380],
+      "size": [180, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/infrastructure/geospatial/JtsGeometryAdapter.java",
+          "line": 20,
+          "end_line": 55,
+          "label": "JTS Topology Suite"
+        },
+        {
+          "path": "src/main/java/com/canvais/infrastructure/geospatial/GeoJsonConverter.java",
+          "line": 15,
+          "end_line": 45,
+          "label": "GeoJSON Converter"
+        }
+      ]
+    },
+    {
+      "id": "ollama_host",
+      "type": "external",
+      "label": "Ollama LLM Server",
+      "sublabel": "Llama 3.2 / Gemma",
+      "tag": "HTTP :11434",
+      "pos": [1330, 240],
+      "size": [150, 64]
+    },
+    {
+      "id": "mcp_servers",
+      "type": "external",
+      "label": "External MCP Servers",
+      "sublabel": "External Plugin Tools",
+      "tag": "JSON-RPC 2.0",
+      "pos": [1330, 620],
+      "size": [150, 64],
+      "sources": [
+        {
+          "path": "src/main/java/com/canvais/infrastructure/mcp/McpClientAdapter.java",
+          "line": 12,
+          "end_line": 35,
+          "label": "MCP Client Adapter"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "CANVAiS Core Server (Spring Boot 3.3.5 / Java 21)",
+      "wraps": [
+        "api_controllers",
+        "vibe_service",
+        "chat_service",
+        "layer_service",
+        "h2_db",
+        "mcp_service",
+        "transcription_spatial",
+        "ollama_adapter",
+        "jts_engine"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-to-client",
+      "from": "user",
+      "to": "web_client",
+      "label": "Draw & Vibe",
+      "variant": "emphasis"
+    },
+    {
+      "id": "client-to-api",
+      "from": "web_client",
+      "to": "api_controllers",
+      "label": "REST Calls"
+    },
+    {
+      "id": "api-to-vibe",
+      "from": "api_controllers",
+      "to": "vibe_service",
+      "label": "Vibe Audio",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "api-to-chat",
+      "from": "api_controllers",
+      "to": "chat_service",
+      "label": "Chat Turns",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-to-layer",
+      "from": "api_controllers",
+      "to": "layer_service",
+      "label": "Layer Ops",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-to-mcp",
+      "from": "api_controllers",
+      "to": "mcp_service",
+      "label": "MCP Config",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "vibe-to-spatial",
+      "from": "vibe_service",
+      "to": "transcription_spatial",
+      "label": "Heuristics"
+    },
+    {
+      "id": "chat-to-ollama",
+      "from": "chat_service",
+      "to": "ollama_adapter",
+      "label": "Prompts",
+      "variant": "emphasis"
+    },
+    {
+      "id": "chat-to-layer",
+      "from": "chat_service",
+      "to": "layer_service",
+      "label": "Overlay",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "layer-to-h2",
+      "from": "layer_service",
+      "to": "h2_db",
+      "label": "JPA Store",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "layer-to-jts",
+      "from": "layer_service",
+      "to": "jts_engine",
+      "label": "Validate JTS"
+    },
+    {
+      "id": "ollama-adapter-to-host",
+      "from": "ollama_adapter",
+      "to": "ollama_host",
+      "label": "HTTP :11434",
+      "variant": "emphasis"
+    },
+    {
+      "id": "mcp-service-to-servers",
+      "from": "mcp_service",
+      "to": "mcp_servers",
+      "label": "JSON-RPC"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Edge & Multimodal UI",
+      "items": [
+        "Leaflet.js interactive map with dynamic GeoJSON vector layers",
+        "HTML5 Audio microphone recorder capturing spoken vibes",
+        "Freehand pointer gesture recording for spatial boundaries and corridors"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Spring Boot Core Services",
+      "items": [
+        "VibeIntentFusionService synthesizes candidate proposals from audio and gesture anchors",
+        "ChatService drives conversational sketch assistant with dedicated overlay layer management",
+        "LayerService & GraphicalEntityService maintain geospatial entities and map sessions"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "AI & Infrastructure Adapters",
+      "items": [
+        "Spring AI Ollama adapter powers local model inference (Llama 3.2, Gemma) with GeoJSON prompts and offline fallback",
+        "JTS Topology Suite ensures topological correctness for EPSG:4326 geometries",
+        "MCP Client integration connects to external domain tools via JSON-RPC 2.0"
+      ]
+    }
+  ]
+}

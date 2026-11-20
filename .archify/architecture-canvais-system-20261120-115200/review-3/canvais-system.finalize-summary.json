@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\candidate.json",
+    "sha256": "13d4e0fc589cca2282faa0d8c59bf3620eb652701cc6288ba77400d7fd546bb1",
+    "bytes": 10415
+  },
+  "artifact": {
+    "path": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\canvais-system.html",
+    "sha256": "9c7b788dcf554cb633a371b9e6f70926203af297e44976a9a1fc058ba94c0416",
+    "bytes": 863933
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\review-3\\canvais-system.finalize.json",
+    "summaryReceipt": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\review-3\\canvais-system.finalize-summary.json",
+    "browserCheckReceipt": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\review-3\\canvais-system.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-20T03:54:35.340Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4339,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "api-to-layer",
+            "from": "api_controllers",
+            "to": "layer_service",
+            "label": "Layer Ops",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "api-to-mcp",
+            "from": "api_controllers",
+            "to": "mcp_service",
+            "label": "MCP Config",
+            "collectionIndex": 5,
+            "artifactIndex": 6
+          },
+          "point": [
+            607,
+            412
+          ],
+          "sharedNode": "api_controllers"
+        }
+      ],
+      "detours": [],
+      "truncated": false
+    },
+    "hints": [
+      "api_controllers → layer_service and api_controllers → mcp_service cross next to api_controllers: move node layer_service or mcp_service so the two reach api_controllers from different sides (for example one level with it, one directly above or below it)."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

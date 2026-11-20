@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\candidate.json",
+    "sha256": "6e8f17749629892987d1ae6a0f062207d299da6d5e882b268be0adec691b7a1f",
+    "bytes": 10161
+  },
+  "artifact": {
+    "path": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\canvais-system.html",
+    "sha256": "ab4292049dc1f69ecd647678ab14ca3ae414ce5fc9adf5cf84a31ea0c626befc",
+    "bytes": 864365
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\canvais-system.finalize.json",
+    "summaryReceipt": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\canvais-system.finalize-summary.json",
+    "browserCheckReceipt": "D:\\projects\\CANVAiS\\git\\CANVAiS\\.archify\\architecture-canvais-system-20261120-115200\\canvais-system.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-20T03:54:35.340Z",
+    "source": "network",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 3713,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "routesOverSuggestedBends": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [],
+      "detours": [
+        {
+          "relationship": {
+            "id": "mcp-service-to-servers",
+            "from": "mcp_service",
+            "to": "mcp_servers",
+            "label": "JSON-RPC",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "bends": 3,
+          "stretch": 1.099,
+          "directCorridorBlockers": [
+            {
+              "id": "h2_db",
+              "label": "H2 Database / JPA",
+              "box": [
+                1050,
+                560,
+                180,
+                64
+              ]
+            }
+          ]
+        }
+      ],
+      "truncated": false
+    },
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}
